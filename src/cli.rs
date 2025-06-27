@@ -4,7 +4,7 @@ use std::env;
 use crate::extractor::extract_contact_info;
 
 pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
-    let matches = Command::new("pdfy")
+    let matches = Command::new("pdfjson")
         .version("0.1.0")
         .author("José Díaz <jose@boquila.org>")
         .about("Extract information from PDF files using AI")
