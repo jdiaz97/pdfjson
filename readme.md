@@ -30,4 +30,4 @@ cargo build --release
 
 ## Demo
 
-[demo](demo.mp4)
+<video src=demo.mp4>Demo</video>
