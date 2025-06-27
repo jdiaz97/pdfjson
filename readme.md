@@ -27,3 +27,7 @@ pdfy example.pdf "Make a summary of this paper, also get me all contact informat
 ```
 cargo build --release
 ```
+
+## Demo
+
+[demo](demo.mp4)
