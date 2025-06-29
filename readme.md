@@ -8,7 +8,7 @@ AI-powered CLI tool to extract information from PDFs using a custom prompt.
 
 ## Usage
 
-First
+You need this environment variable
 
 ```
 GROQ_API_KEY=your_api_key
@@ -17,13 +17,13 @@ GROQ_API_KEY=your_api_key
 And then
 
 ```
-pdfy <pdf-file> "<your prompt>"
+pdfx <pdf-file> "<your prompt>"
 ```
 
 Example:
 
 ```
-pdfy example.pdf "Make a summary of this paper, also get me all contact information."
+pdfx example.pdf "Make a summary of this paper, also get me all contact information."
 ```
 
 ## How to compile
