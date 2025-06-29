@@ -1,4 +1,4 @@
-# pdfy
+# pdfx
 
 AI-powered CLI tool to extract information from PDFs using a custom prompt.
 
