@@ -889,7 +889,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdfy"
+name = "pdfx"
 version = "0.1.0"
 dependencies = [
  "anyhow",

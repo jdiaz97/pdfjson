@@ -1,6 +1,6 @@
 #[tokio::main]
 async fn main() {
-    let _ = pdfy::cli::run_cli().await;
+    let _ = pdfx::cli::run_cli().await;
     // hide_window();
     // boquilahub::gui::run_gui();
 }
