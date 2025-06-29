@@ -1,7 +1,7 @@
 use clap::{Arg, Command};
 use std::process;
 use std::env;
-use crate::extractor::extract_contact_info;
+use crate::extractor::retrieve;
 
 pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("pdfy")
@@ -41,8 +41,7 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         process::exit(1);
     }
 
-    // Call the extraction function
-    match extract_contact_info(api_key, pdf_file, prompt).await {
+    match retrieve(api_key, pdf_file, prompt).await {
         Ok(result) => {
             println!("{}", result);
         }

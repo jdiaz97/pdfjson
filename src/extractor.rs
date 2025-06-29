@@ -107,7 +107,7 @@ impl PdfExtractor {
     }
 }
 
-pub async fn extract_contact_info(api_key: String, pdf_file: &str, prompt: &str) -> Result<String> {
+pub async fn retrieve(api_key: String, pdf_file: &str, prompt: &str) -> Result<String> {
     let extractor = PdfExtractor::new(api_key);
     let result: Value = extractor.extract_pdf_to_json(pdf_file, prompt).await?;
     let formatted = serde_json::to_string_pretty(&result)?;
