@@ -4,7 +4,7 @@ AI-powered CLI tool to extract information from PDFs using a custom prompt.
 
 ## Demo
 
-<video src=https://github.com/user-attachments/assets/879c8d9c-3dcf-4342-9ba4-8165b41a1c6a>A video showing various Brush features and scenes</video>
+<video src=https://github.com/user-attachments/assets/ff53181b-07d2-452a-8d15-898634447f13>A video showing various Brush features and scenes</video>
 
 ## Usage
 
