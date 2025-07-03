@@ -1,4 +1,5 @@
 use clap::{Arg, Command};
+use clap::ArgAction;
 use std::process;
 use std::env;
 use crate::extractor::retrieve;
@@ -6,7 +7,7 @@ use crate::extractor::retrieve;
 pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("pdfx")
         .version("0.1.0")
-        .author("José Díaz <jose@boquila.org>")
+        .author("José Díaz <jose@boquila.org> & Adesoji Alu <adesoji.alu@gmail.com>")
         .about("Extract information from PDF files using AI")
         .arg(
             Arg::new("pdf-file")
@@ -20,15 +21,28 @@ pub async fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
                 .required(true)
                 .index(2)
         )
+        .arg(
+            Arg::new("openai")
+                .long("openai")
+                .action(ArgAction::SetTrue)
+                .help("Use OpenAI GPT 4.1 API for extraction"),
+        )
         .get_matches();
 
+    // Check if the --openai flag is set
+    let use_openai = matches.get_flag("openai");
+
     // Get API key from environment variable
-    let api_key = match env::var("GROQ_API_KEY") {
-        Ok(key) => key,
-        Err(_) => {
+    let api_key = if use_openai {
+        env::var("OPENAI_API_KEY").unwrap_or_else(|_| {
+            eprintln!("Error: OPENAI_API_KEY environment variable not set");
+            process::exit(1);
+        })
+    } else {
+        env::var("GROQ_API_KEY").unwrap_or_else(|_| {
             eprintln!("Error: GROQ_API_KEY environment variable not set");
             process::exit(1);
-        }
+        })
     };
 
     // Extract arguments
