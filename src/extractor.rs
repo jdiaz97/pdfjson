@@ -4,13 +4,26 @@ use reqwest;
 use pdf_extract;
 
 #[derive(Debug)]
+pub enum Backend { Groq, Openai }
+// pub struct PdfExtractor {
+//     groq_api_key: String,
+// }
+
+
 pub struct PdfExtractor {
-    groq_api_key: String,
+    api_key: String,
+    backend: Backend,
 }
 
+
+// impl PdfExtractor {
+//     pub fn new(groq_api_key: String) -> Self {
+//         Self { groq_api_key }
+//     }
+
 impl PdfExtractor {
-    pub fn new(groq_api_key: String) -> Self {
-        Self { groq_api_key }
+    pub fn new(api_key: String, backend: Backend) -> Self {
+        Self { api_key, backend }
     }
 
     /// Extract information from a PDF using GROQ API based on a prompt
@@ -22,8 +35,12 @@ impl PdfExtractor {
         // Extract text from PDF
         let text = self.extract_pdf_text(pdf_path)?;
         
-        // Make API call to GROQ
-        let result = self.call_groq_api(&text, prompt).await?;
+        // // Make API call to GROQ
+        // let result = self.call_groq_api(&text, prompt).await?;
+        let result = match self.backend {
+            Backend::Groq   => self.call_groq_api(&text, prompt).await?,
+            Backend::Openai => self.call_openai_api(&text, prompt).await?,
+        };
         
         Ok(result)
     }
@@ -37,6 +54,37 @@ impl PdfExtractor {
             Err(e) => Err(anyhow!("Failed to extract PDF text: {}", e)),
         }
     }
+
+    /// New: call GPT-4.1
+    async fn call_openai_api(&self, text: &str, prompt: &str) -> Result<Value> {
+        let client = reqwest::Client::new();
+        let url = "https://api.openai.com/v1/chat/completions";
+
+        let body = json!({
+            "model": "gpt-4.1",
+            "messages": [
+                { "role": "system", "content": format!("Extract JSON for: {}", prompt) },
+                { "role": "user",   "content": text }
+            ],
+            "temperature": 0.1,
+            "max_tokens": 2000
+        });
+
+        let resp = client.post(url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .json(&body)
+            .send()
+            .await?;
+
+        let v: Value = resp.json().await?;
+        let content = v["choices"][0]["message"]["content"]
+            .as_str()
+            .ok_or_else(|| anyhow!("bad OpenAI format"))?;
+        serde_json::from_str(content)
+            .map_err(|e| anyhow!("parse error: {}", e))
+    }
+ 
+
 
     /// Make API call to GROQ
     async fn call_groq_api(&self, text: &str, prompt: &str) -> Result<Value> {
@@ -66,7 +114,7 @@ impl PdfExtractor {
         let response = client
             .post(url)
             .header("Content-Type", "application/json")
-            .header("Authorization", format!("Bearer {}", self.groq_api_key))
+            .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&request_body)
             .send()
             .await?;
@@ -107,8 +155,10 @@ impl PdfExtractor {
     }
 }
 
-pub async fn retrieve(api_key: String, pdf_file: &str, prompt: &str) -> Result<String> {
-    let extractor = PdfExtractor::new(api_key);
+
+
+pub async fn retrieve(api_key: String, pdf_file: &str, prompt: &str,) -> Result<String> {
+    let extractor = PdfExtractor::new(api_key, Backend::Groq);
     let result: Value = extractor.extract_pdf_to_json(pdf_file, prompt).await?;
     let formatted = serde_json::to_string_pretty(&result)?;
     Ok(formatted)
@@ -120,13 +170,13 @@ mod tests {
 
     #[tokio::test]
     async fn test_pdf_extractor_creation() {
-        let extractor = PdfExtractor::new("test_key".to_string());
-        assert_eq!(extractor.groq_api_key, "test_key");
+        let extractor = PdfExtractor::new("test_key".to_string(), Backend::Groq);
+        assert_eq!(extractor.api_key, "test_key");
     }
 
     #[test]
     fn test_extract_pdf_text_nonexistent_file() {
-        let extractor = PdfExtractor::new("test_key".to_string());
+        let extractor = PdfExtractor::new("test_key".to_string(), Backend::Groq);
         let result = extractor.extract_pdf_text("nonexistent.pdf");
         assert!(result.is_err());
     }
